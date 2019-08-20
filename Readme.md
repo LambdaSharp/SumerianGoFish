@@ -43,7 +43,7 @@ Drink cards:
 
 ---
 
-- [Install .Net 2.1](https://dotnet.microsoft.com/download)
+- [Install .Net Core 2.1](https://dotnet.microsoft.com/download)
 - [Sign up for AWS account](https://aws.amazon.com/)
 - [Install AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html)
 - [See Latest Release Notes for Sumerian Browser Compatibility](https://aws.amazon.com/releasenotes/?tag=releasenotes%23keywords%23amazon-sumerian)
