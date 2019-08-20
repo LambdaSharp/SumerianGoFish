@@ -54,14 +54,14 @@ Drink cards:
 
 	```
 	dotnet tool uninstall -g LambdaSharp.Tool
-	dotnet tool install -g LambdaSharp.Tool --version 0.7.0-rc6
+	dotnet tool install -g LambdaSharp.Tool --version 0.7.0-rc7
 	lash --version
 	```
 	OR
   - Install lash
 
 	```
-	dotnet tool install -g LambdaSharp.Tool --version 0.7.0-rc6
+	dotnet tool install -g LambdaSharp.Tool --version 0.7.0-rc7
 	lash --version
 	```
 
