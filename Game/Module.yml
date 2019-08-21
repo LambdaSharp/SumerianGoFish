@@ -1,0 +1,197 @@
+Module: Sumerian.GoFish
+Version: 1.0-DEV
+Description: Resources to play a Game of Go Fish with a Sumerian via a Lex Bot
+
+Using:
+  - Module: LambdaSharp.S3.IO@lambdasharp
+
+Items:
+
+  ###################
+  # GoFish Function
+  ###################        
+  - Variable: AccountRegion
+    Value: !Sub "${AWS::Region}"
+    Scope: GoFish
+    
+  - Function: GoFish
+    Scope: public
+    Description: Play a game of go fish
+    Memory: 256
+    Timeout: 30  
+        
+  #################################################
+  # Permissions for Lex to invoke lambda function
+  #################################################  
+  - Resource: PermissionForLexToInvokeGoFishBotNewGame
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:invokeFunction
+      FunctionName: !Ref GoFish
+      Principal: lex.amazonaws.com
+      SourceArn: !Sub "arn:aws:lex:${AWS::Region}:${AWS::AccountId}:intent:NewGame:*"
+
+  - Resource: PermissionForLexToInvokeGoFishBotAskForCard
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:invokeFunction
+      FunctionName: !Ref GoFish
+      Principal: lex.amazonaws.com
+      SourceArn: !Sub "arn:aws:lex:${AWS::Region}:${AWS::AccountId}:intent:AskForCard:*"
+
+  - Resource: PermissionForLexToInvokeGoFishBotGoFish
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:invokeFunction
+      FunctionName: !Ref GoFish
+      Principal: lex.amazonaws.com
+      SourceArn: !Sub "arn:aws:lex:${AWS::Region}:${AWS::AccountId}:intent:GoFish:*"
+
+  - Resource: PermissionForLexToInvokeGoFishBotGiveUpCard
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:invokeFunction
+      FunctionName: !Ref GoFish
+      Principal: lex.amazonaws.com
+      SourceArn: !Sub "arn:aws:lex:${AWS::Region}:${AWS::AccountId}:intent:GiveUpCard:*"
+
+  - Resource: PermissionForLexToInvokeGoFishBotScore
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:invokeFunction
+      FunctionName: !Ref GoFish
+      Principal: lex.amazonaws.com
+      SourceArn: !Sub "arn:aws:lex:${AWS::Region}:${AWS::AccountId}:intent:Score:*"
+
+  - Resource: PermissionForLexToInvokeGoFishBotEndGame
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:invokeFunction
+      FunctionName: !Ref GoFish
+      Principal: lex.amazonaws.com
+      SourceArn: !Sub "arn:aws:lex:${AWS::Region}:${AWS::AccountId}:intent:EndGame:*"
+
+  ######################################
+  # GoFish Database For Game Session
+  ######################################          
+  - Resource: GoFishSessions
+    Description: Stores the game session
+    Scope: all
+    Allow:
+      - dynamodb:GetItem
+      - dynamodb:PutItem
+      - dynamodb:DeleteItem
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: game_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: game_id
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+
+  #####################################
+  # Cognito identity pool for sumerian
+  #####################################
+  - Resource: SumerianCognitoIdentityPool
+    Type: AWS::Cognito::IdentityPool
+    Properties:
+      AllowUnauthenticatedIdentities: True
+
+  ###########################################
+  # role for cognito sumerian unauthenticated
+  ###########################################
+  - Resource: CognitoIdentityRole
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Action: sts:AssumeRoleWithWebIdentity
+            Effect: Allow
+            Principal:
+              Federated: 'cognito-identity.amazonaws.com'
+            Condition:
+              StringEquals:
+                cognito-identity.amazonaws.com:aud:
+                  Ref: SumerianCognitoIdentityPool
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonPollyReadOnlyAccess
+        - arn:aws:iam::aws:policy/AmazonLexRunBotsOnly
+        - arn:aws:iam::aws:policy/AmazonDynamoDBReadOnlyAccess
+
+  ###########################################
+  # role for cognito sumerian authenticated
+  ###########################################
+  - Resource: CognitoIdentityRoleAuthenticated
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Action: sts:AssumeRoleWithWebIdentity
+            Effect: Allow
+            Principal:
+              Federated: 'cognito-identity.amazonaws.com'
+            Condition:
+              StringEquals:
+                cognito-identity.amazonaws.com:aud:
+                  Ref: SumerianCognitoIdentityPool
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonPollyReadOnlyAccess
+        - arn:aws:iam::aws:policy/AmazonLexRunBotsOnly
+        - arn:aws:iam::aws:policy/AmazonDynamoDBReadOnlyAccess
+
+  ####################################################
+  # Cognito identity pool role
+  ####################################################
+  - Resource: SumerianCognitoRoleAttachment
+    Type: AWS::Cognito::IdentityPoolRoleAttachment
+    Properties:
+      IdentityPoolId: !Ref SumerianCognitoIdentityPool
+      Roles:
+        unauthenticated: !GetAtt CognitoIdentityRole.Arn
+        authenticated: !GetAtt CognitoIdentityRoleAuthenticated.Arn
+
+  ####################################################
+  # Background Assets for sumerian go fish
+  ####################################################
+  - Resource: GoFishSumerianBucket
+    Scope: GoFish
+    Description: S3 bucket for hosting sumerian assets
+    Type: AWS::S3::Bucket
+    Properties:
+      WebsiteConfiguration:
+        ErrorDocument: error/index.html
+        IndexDocument: index.html
+
+  - Resource: GoFishSumerianBucketPolicy
+    Description: Public access policy
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      PolicyDocument:
+        Id: WebsiteBucket
+        Version: 2012-10-17
+        Statement:
+          - Sid: PublicReadForGetBucketObjects
+            Effect: Allow
+            Principal: '*'
+            Action: s3:GetObject
+            Resource: !Sub "${GoFishSumerianBucket.Arn}/*"
+      Bucket: !Ref GoFishSumerianBucket
+    DependsOn: DeploySumerianFiles
+
+  - Package: SumerianAssets
+    Description: Sumerian assests to deploy
+    Files: assets/*.png
+
+  - Resource: DeploySumerianFiles
+    Type: LambdaSharp::S3::Unzip
+    Properties:
+      SourceBucket: !Ref DeploymentBucketName
+      SourceKey: !Ref SumerianAssets
+      DestinationBucket: !Ref GoFishSumerianBucket
+      DestinationKey: ""

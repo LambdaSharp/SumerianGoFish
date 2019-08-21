@@ -1,0 +1,169 @@
+{
+  "metadata": {
+    "schemaVersion": "1.0",
+    "importType": "LEX",
+    "importFormat": "JSON"
+  },
+  "resource": {
+    "name": "GoFishBot",
+    "version": "1",
+    "intents": [
+      {
+        "name": "GiveUpCard",
+        "version": "1",
+        "fulfillmentActivity": {
+          "codeHook": {
+            "uri": "PASTE_LAMBDA_ARN_HERE",
+            "messageVersion": "1.0"
+          },
+          "type": "CodeHook"
+        },
+        "sampleUtterances": [
+          "I have a {GoFishCard}"
+        ],
+        "slots": [
+          {
+            "sampleUtterances": [],
+            "slotType": "AMAZON.Drink",
+            "slotConstraint": "Required",
+            "valueElicitationPrompt": {
+              "messages": [
+                {
+                  "contentType": "PlainText",
+                  "content": "Which card?"
+                }
+              ],
+              "maxAttempts": 2
+            },
+            "priority": 1,
+            "name": "GoFishCard"
+          }
+        ]
+      },
+      {
+        "name": "Score",
+        "version": "1",
+        "fulfillmentActivity": {
+          "codeHook": {
+            "uri": "PASTE_LAMBDA_ARN_HERE",
+            "messageVersion": "1.0"
+          },
+          "type": "CodeHook"
+        },
+        "sampleUtterances": [
+          "What is the score",
+          "Score",
+          "Tell me the score",
+          "How many matches do you have",
+          "How many matches do I have"
+        ],
+        "slots": []
+      },
+      {
+        "name": "NewGame",
+        "version": "1",
+        "fulfillmentActivity": {
+          "codeHook": {
+            "uri": "PASTE_LAMBDA_ARN_HERE",
+            "messageVersion": "1.0"
+          },
+          "type": "CodeHook"
+        },
+        "sampleUtterances": [
+          "start game",
+          "start new game",
+          "begin game",
+          "begin new game",
+          "new game",
+          "restart"
+        ],
+        "slots": []
+      },
+      {
+        "name": "EndGame",
+        "version": "1",
+        "fulfillmentActivity": {
+          "codeHook": {
+            "uri": "PASTE_LAMBDA_ARN_HERE",
+            "messageVersion": "1.0"
+          },
+          "type": "CodeHook"
+        },
+        "sampleUtterances": [
+          "end game",
+          "stop game"
+        ],
+        "slots": []
+      },
+      {
+        "name": "AskForCard",
+        "version": "2",
+        "fulfillmentActivity": {
+          "codeHook": {
+            "uri": "PASTE_LAMBDA_ARN_HERE",
+            "messageVersion": "1.0"
+          },
+          "type": "CodeHook"
+        },
+        "sampleUtterances": [
+          "Do you have a {GoFishCard}",
+          "Go fish. Do you have a {GoFishCard}"
+        ],
+        "slots": [
+          {
+            "sampleUtterances": [],
+            "slotType": "AMAZON.Drink",
+            "slotConstraint": "Required",
+            "valueElicitationPrompt": {
+              "messages": [
+                {
+                  "contentType": "PlainText",
+                  "content": "What card are you asking for?"
+                }
+              ],
+              "maxAttempts": 2
+            },
+            "priority": 1,
+            "name": "GoFishCard"
+          }
+        ]
+      },
+      {
+        "name": "GoFish",
+        "version": "1",
+        "fulfillmentActivity": {
+          "codeHook": {
+            "uri": "PASTE_LAMBDA_ARN_HERE",
+            "messageVersion": "1.0"
+          },
+          "type": "CodeHook"
+        },
+        "sampleUtterances": [
+          "Go fish"
+        ],
+        "slots": []
+      }
+    ],
+    "voiceId": "Joanna",
+    "childDirected": false,
+    "locale": "en-US",
+    "idleSessionTTLInSeconds": 300,
+    "clarificationPrompt": {
+      "messages": [
+        {
+          "contentType": "PlainText",
+          "content": "Sorry, can you please repeat that?"
+        }
+      ],
+      "maxAttempts": 5
+    },
+    "abortStatement": {
+      "messages": [
+        {
+          "contentType": "PlainText",
+          "content": "Sorry, I could not understand. Goodbye."
+        }
+      ]
+    }
+  }
+}
